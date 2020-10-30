@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+    web:
+        build: .
+        command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --certfile=/etc/certs/honeyjar.crt --keyfile=/etc/certs/honeyjar.key website.wsgi:application --bind 0.0.0.0:443"
+        container_name: honeyjar
+        env_file:
+            - ./config/web/web-variables.env
+        volumes:
+            - ./website/:/code
+            - ./config/nginx/certs/:/etc/certs
+        expose:
+            - "443"
+    nginx:
+        image: nginx:latest
+        container_name: web_ngin
+        ports:
+            - "443:443"
+            - "80:80"
+        volumes:
+            - ./config/nginx/:/etc/nginx/conf.d
+        depends_on:
+            - web
