@@ -12,6 +12,18 @@ services:
             - ./config/nginx/certs/:/etc/certs
         expose:
             - "443"
+        depends_on:
+            - database
+
+    database:
+        image: postgres:latest # use latest postgres version
+        container_name: apiarist
+        env_file:
+            - ./config/postgresql/postgres-variables.env
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/ # persist data even if container shuts down
+
+
     nginx:
         image: nginx:latest
         container_name: web_ngin
@@ -22,3 +34,6 @@ services:
             - ./config/nginx/:/etc/nginx/conf.d
         depends_on:
             - web
+
+volumes:
+        postgres_data:
